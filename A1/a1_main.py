@@ -3,12 +3,12 @@ from scipy.optimize import linprog
 
 
 def get_exam_input_april2020():
-    # Slack variables added
+    # Canonical form
     new_input = {
-        "c":np.array([-2, -1, 0, 0]),
+        "c":np.array([-2, -1]),
         "A":np.array([
-                     [1, 1, 1, 0],
-                     [1, -1, 0, 1]
+                     [1, 1],
+                     [1, -1]
                      ]),
         "b":np.array([3, 1]),
         "solution": True
@@ -17,12 +17,12 @@ def get_exam_input_april2020():
 
 
 def get_exam_input_jan2020():
-    # Slack variables added
+    # Canonical form
     new_input = {
-        "c":np.array([-10, -6, 8, 0, 0]),
+        "c":np.array([-10, -6, 8]),
         "A":np.array([
-                     [5, -2, 6, 1, 0],
-                     [10, 4, -6, 0, 1]
+                     [5, -2, 6],
+                     [10, 4, -6]
                      ]),
         "b":np.array([20, 30]),
         "solution": True
@@ -33,12 +33,14 @@ def get_exam_input_jan2020():
 def get_book_input_page44():
     """
     Example used to show the Simplex Method.
+    Canonical form
+
     """
     new_input = {
-        "c":np.array([-400, -300, 0, 0]),
+        "c":np.array([-400, -300]),
         "A":np.array([
-                     [1, 1, 1, 0],
-                     [2, 1, 0, 1]
+                     [1, 1],
+                     [2, 1]
                      ]),
         "b":np.array([200, 300]),
         "solution": True
@@ -46,53 +48,37 @@ def get_book_input_page44():
     return new_input
 
 
-def generate_input(dim_m=2, dim_n=3):
+def get_book_input_ex54():
+    # Canonical form
     new_input = {
-        "c":np.random.normal(size=dim_n),
-        "A":np.random.normal(size=(dim_m, dim_n)),
-        "b":np.random.uniform(low=0.01, high=5.0, size=dim_m)
+        "c":np.array([-3, 4, -2, 5]),
+        "A":np.array([
+                     [1, 1, -1, -1],
+                     [1, -1, 1, -1]
+                     ]),
+        "b":np.array([8, 4]),
+        "solution": True
     }
     return new_input
 
+def get_book_input_ex54_alternate():
+    # Canonical form
+    new_input = {
+        "c":np.array([-3, 4, -2, 2]),
+        "A":np.array([
+                     [1, 1, -1, -1],
+                     [1, -1, 1, -1]
+                     ]),
+        "b":np.array([8, 4]),
+        "solution": False
+    }
+    return new_input
 
 def get_linprog_answer(form_input):
     return linprog(c=form_input["c"],
-                   A_ub=form_input["A"],
-                   b_ub=form_input["b"],
+                   A_eq=form_input["A"],
+                   b_eq=form_input["b"],
                    method="simplex")
-
-
-def solve_auxilliary_problem_first(*, input_dic):
-    print("solve_auxilliary_problem_first")
-    def objective_function(*, vector_y):
-        return np.sum(vector_y)
-    m_dim = input_dic["A"].shape[0]
-    n_dim = input_dic["A"].shape[1]
-    I_matrix = np.identity(m_dim)
-    A_tilde = np.concatenate((input_dic["A"], I_matrix), axis=1)
-    print(A_tilde)
-    print(A_tilde.shape)
-    c_tilde = np.ones(A_tilde.shape[1])
-    #c_tilde[0:n_dim] = input_dic["c"]
-    print(f"c_tilde {c_tilde.shape}")
-    solution = simplex_solve(matrix_A=A_tilde,
-                             vector_b=input_dic["b"],
-                             vector_c=c_tilde, #input_dic["c"],
-                             basic_index_tuple=list(range(n_dim, A_tilde.shape[1])),
-                             non_basic_index_tuple=list(range(0, n_dim)))
-    print(f"solution {solution}")
-    return transform_aux_solution_to_start_solution(aux_solution=solution,
-                                                    m_dim=m_dim,
-                                                    n_dim=n_dim)
-
-
-def transform_aux_solution_to_start_solution(*, aux_solution, m_dim, n_dim):
-    start_solution = []
-    for variable_index, val in enumerate(aux_solution):
-        if(val != 0):
-            start_solution.append(variable_index)
-    assert(len(start_solution) == m_dim)
-    return start_solution
 
 
 def is_vector_semi_positive_definite(test_vector):
@@ -124,7 +110,6 @@ def calc_y(*, matrix_A, vector_c, basic_index_tuple):
 def calc_reduced_costs(matrix_A, vector_c, non_basic_index_tuple, vector_y):
     non_basic_matrix = matrix_A[:, non_basic_index_tuple]
     vector_c_non_basic = vector_c[non_basic_index_tuple]
-    #print(f"reduced_cost: {vector_c_non_basic - non_basic_matrix.T @ vector_y}")
     return vector_c_non_basic - non_basic_matrix.T @ vector_y
 
 
@@ -136,11 +121,6 @@ def calc_a_line_q(*, q_index, basic_index_tuple, non_basic_index_tuple, matrix_A
 
 def calc_t_max_and_p_index(*, b_line, a_line_q):
     # t_max can actually be skipped
-    a_line_q[a_line_q == 0] = 0.000001 # Make certain that these ones are not chosen 
-    #print(f"b_line {b_line.shape}")
-    #print(f"unfiltered ratios {list(zip(b_line.tolist(), a_line_q.tolist()))}")
-    #ratios = [b_line_i/a_line_i_q for (b_line_i, a_line_i_q) in zip(
-    #    b_line.tolist(), a_line_q.tolist())]
     ratios = []
     LARGE_VALUE = 999999
     for (b_line_i, a_line_i_q) in zip(b_line.tolist(), a_line_q.tolist()):
@@ -149,7 +129,6 @@ def calc_t_max_and_p_index(*, b_line, a_line_q):
             ratios.append(new_ratio)
         else:
             ratios.append(LARGE_VALUE)
-    #print(f"filtered ratios {ratios}")
     p_index = np.argmin(ratios)
     return p_index
 
@@ -159,8 +138,10 @@ def simplex_solve(*, matrix_A, vector_b, vector_c, basic_index_tuple,
     max_iter = 100000
     dim_n = matrix_A.shape[1]
     iter = 0
+    # This loop keeps the iterations of the simplex method going until we have found a solution
+    # We use a max_iter variable to avoid infinite loops during testing
     while True:
-        #print(f"iter {iter}")
+        # Run simplex iteration {iter}
         if(iter > max_iter):
             print("simplex_solve passed max_iter, returning False")
             return False
@@ -180,11 +161,8 @@ def simplex_solve(*, matrix_A, vector_b, vector_c, basic_index_tuple,
                                                basic_index_tuple=basic_index_tuple,
                                                dim_n=dim_n)
         q_index = np.argmin(r_v)
-        #print(f"q_index {q_index}")
         r_v_q = r_v[q_index]
-        #print(f"r_v_q {r_v_q}")
         q_actual_index = non_basic_index_tuple[q_index]
-        #print(f"q_actual_index {q_actual_index}")
         a_line_q = calc_a_line_q(q_index=q_index,
                                  basic_index_tuple=basic_index_tuple,
                                  non_basic_index_tuple=non_basic_index_tuple,
@@ -192,23 +170,38 @@ def simplex_solve(*, matrix_A, vector_b, vector_c, basic_index_tuple,
         if(is_vector_semi_negative_definite(a_line_q)):
             # No optimal solution for problem
             return False
-        #t_max = calc_t_max()
         p_index = calc_t_max_and_p_index(b_line=b_line, a_line_q=a_line_q)
         temp_index = basic_index_tuple[p_index]
         print(f"Replacing {temp_index} with {non_basic_index_tuple[q_index]} in basic_index_tuple")
         basic_index_tuple[p_index] = non_basic_index_tuple[q_index]
         non_basic_index_tuple[q_index] = temp_index
-        #print(f"new basic_index_tuple {basic_index_tuple}")
-        #print(f"new non_basic_index_tuple {non_basic_index_tuple}")
         iter += 1
 
 
-def test_without_aux():
+def add_slack_variables(new_input):
+    m_dim = new_input["A"].shape[0]
+    n_dim = new_input["A"].shape[1]
+    I_matrix = np.identity(m_dim)
+    A_tilde = np.concatenate((new_input["A"], I_matrix), axis=1)
+    c_tilde = np.concatenate((new_input["c"],np.zeros(m_dim)))
+    new_input["A"] = A_tilde
+    new_input["c"] = c_tilde
+    return new_input
+
+
+def test_simplex_implementation():
     # It is assumed that these problems have m number of slack variables added
-    input_list = [get_exam_input_jan2020, get_exam_input_april2020, get_book_input_page44]
+    # Below is a list of functions to retrieve simplex problems from the course
+    input_list = [get_exam_input_jan2020,
+                  get_exam_input_april2020,
+                  get_book_input_page44,
+                  get_book_input_ex54,
+                  get_book_input_ex54_alternate]
+    # This loops tests our simplex implementation on every simplex example above
     for input_source in input_list:
-        new_input = input_source() #get_book_input_page44() #get_exam_input_april2020() #get_book_input_page44()
-        answer = get_linprog_answer(new_input)
+        new_input = input_source()
+        new_input = add_slack_variables(new_input) # Transform canonical form to Standard form with slack variables
+        answer = get_linprog_answer(new_input) # This is our benchmark.
         print(f"answer {answer}")
         m_dim = new_input["A"].shape[0]
         n_dim = new_input["A"].shape[1]
@@ -220,30 +213,14 @@ def test_without_aux():
                                     vector_c=new_input["c"],
                                     basic_index_tuple=slack_basic_index_tuple,
                                     non_basic_index_tuple=non_basic_index_tuple)
-        print(f"final_solution {final_solution}")
+        if(final_solution is False):
+            print("No solution found")
+        else:
+            print(f"final_solution {final_solution}")
 
-
-def text_with_aux():
-    pass
 
 def main():
-    print("Hello world!")
-    test_without_aux()
-    #test_with_aux()
-    return
-    new_input = get_exam_input_jan2020() #get_book_input_page44() #get_exam_input_april2020() #get_book_input_page44()
-    print(new_input)
-    answer = get_linprog_answer(new_input)
-    print(answer)
-    start_solution = solve_auxilliary_problem_first(input_dic=new_input)
-    non_basic_index_tuple = list(set(range(0, new_input["A"].shape[1])) - set(start_solution))
-    print(f"start_solution {start_solution}")
-    final_solution = simplex_solve(matrix_A=new_input["A"],
-                                   vector_b=new_input["b"],
-                                   vector_c=new_input["c"],
-                                   basic_index_tuple=start_solution,
-                                   non_basic_index_tuple=non_basic_index_tuple)
-    print(f"final_solution {final_solution}")
+    test_simplex_implementation()
 
 
 if __name__ == "__main__":
