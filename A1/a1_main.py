@@ -61,6 +61,7 @@ def get_book_input_ex54():
     }
     return new_input
 
+
 def get_book_input_ex54_alternate():
     # Canonical form
     new_input = {
@@ -73,6 +74,7 @@ def get_book_input_ex54_alternate():
         "solution": False
     }
     return new_input
+
 
 def get_linprog_answer(form_input):
     return linprog(c=form_input["c"],
@@ -162,7 +164,6 @@ def simplex_solve(*, matrix_A, vector_b, vector_c, basic_index_tuple,
                                                dim_n=dim_n)
         q_index = np.argmin(r_v)
         r_v_q = r_v[q_index]
-        q_actual_index = non_basic_index_tuple[q_index]
         a_line_q = calc_a_line_q(q_index=q_index,
                                  basic_index_tuple=basic_index_tuple,
                                  non_basic_index_tuple=non_basic_index_tuple,
@@ -190,7 +191,6 @@ def add_slack_variables(new_input):
 
 
 def test_simplex_implementation():
-    # It is assumed that these problems have m number of slack variables added
     # Below is a list of functions to retrieve simplex problems from the course
     input_list = [get_exam_input_jan2020,
                   get_exam_input_april2020,
