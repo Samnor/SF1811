@@ -35,9 +35,11 @@ for r_index=1:n_of_rs
     C2=D*Corr*D;
     C=0.5*(C2+C2');
     % Find optimal values with quadprog
-	Aeq = [mu,e_vector]';
-    beq = [rs(r_index); 1];
-    [x,fval,exitflag,output,lambda] = quadprog(C,f_vector,[],[],Aeq,beq,lb);
+	Aeq = [mu]';
+    A = [e_vector]';
+    beq = [rs(r_index)];
+    b = [1];
+    [x,fval,exitflag,output,lambda] = quadprog(C,f_vector,A,b,Aeq,beq,lb);
     optimal_sigmas(r_index) = sqrt(fval);
     optimal_mus(r_index) = mu' * x;
 
@@ -48,5 +50,4 @@ optimal_mus
 plot(optimal_sigmas, optimal_mus)
 xlabel('optimal mu')
 ylabel('optimal sigma')
-title('Exercise 1')
-
+title('Exercise 2')
