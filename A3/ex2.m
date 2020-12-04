@@ -47,7 +47,9 @@ end
 
 optimal_sigmas
 optimal_mus
-plot(optimal_sigmas, optimal_mus)
+scatter(optimal_sigmas, optimal_mus, [], rs, "filled")
+
+%plot(optimal_sigmas, optimal_mus)
 xlabel('optimal mu')
 ylabel('optimal sigma')
 title('Exercise 2')

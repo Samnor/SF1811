@@ -40,6 +40,7 @@ for r_index=1:n_of_rs
     b = [-1*rs(r_index)];
     beq = [1];
     [x,fval,exitflag,output,lambda] = quadprog(C,f_vector,A,b,Aeq,beq,lb);
+    output
     optimal_sigmas(r_index) = sqrt(fval);
     optimal_mus(r_index) = mu' * x;
 
@@ -47,7 +48,8 @@ end
 
 optimal_sigmas
 optimal_mus
-plot(optimal_sigmas, optimal_mus)
+scatter(optimal_sigmas, optimal_mus, [], rs, "filled")
+%plot(optimal_sigmas, optimal_mus)
 xlabel('optimal mu')
 ylabel('optimal sigma')
 title('Exercise 3')
